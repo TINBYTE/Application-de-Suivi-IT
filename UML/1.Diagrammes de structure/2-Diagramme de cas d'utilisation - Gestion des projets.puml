@@ -1,0 +1,159 @@
+@startuml
+!theme plain
+title Diagramme de Cas d'Utilisation - Module Gestion des Projets\nApplication RSI Django
+
+left to right direction
+
+actor "RSI\n(Responsable SI)" as RSI
+
+package "Gestion des Projets" {
+  
+  package "Création et Initialisation" {
+    usecase "Créer nouveau projet" as UC_P01
+    usecase "Définir informations de base" as UC_P02
+    usecase "Saisir description détaillée" as UC_P03
+    usecase "Planifier dates" as UC_P04
+    usecase "Définir priorité" as UC_P05
+    usecase "Attribuer budget" as UC_P06
+    usecase "Ajouter tags/catégories" as UC_P07
+  }
+  
+  package "Gestion des Parties Prenantes" {
+    usecase "Associer sous-traitant principal" as UC_P08
+    usecase "Ajouter sous-traitants secondaires" as UC_P09
+    usecase "Modifier assignations" as UC_P10
+    usecase "Définir responsabilités" as UC_P11
+    usecase "Gérer contacts projet" as UC_P12
+  }
+  
+  package "Suivi et Progression" {
+    usecase "Consulter état projet" as UC_P13
+    usecase "Mettre à jour statut" as UC_P14
+    usecase "Suivre avancement" as UC_P15
+    usecase "Calculer progression" as UC_P16
+    usecase "Identifier retards" as UC_P17
+    usecase "Ajuster planning" as UC_P18
+    usecase "Valider jalons" as UC_P19
+  }
+  
+  package "Documentation et Fichiers" {
+    usecase "Joindre documents" as UC_P20
+    usecase "Organiser fichiers" as UC_P21
+    usecase "Versionner documents" as UC_P22
+    usecase "Télécharger pièces jointes" as UC_P23
+    usecase "Archiver anciens fichiers" as UC_P24
+  }
+  
+  package "Communication Projet" {
+    usecase "Ajouter notes projet" as UC_P25
+    usecase "Enregistrer commentaires" as UC_P26
+    usecase "Suivre historique modifications" as UC_P27
+    usecase "Communiquer avec sous-traitants" as UC_P28
+    usecase "Planifier réunions" as UC_P29
+  }
+  
+  package "Association Tickets" {
+    usecase "Lier tickets au projet" as UC_P30
+    usecase "Visualiser tickets associés" as UC_P31
+    usecase "Analyser impact tickets" as UC_P32
+    usecase "Prioriser tickets projet" as UC_P33
+    usecase "Suivre résolution globale" as UC_P34
+  }
+  
+  package "Reporting Projet" {
+    usecase "Générer rapport projet" as UC_P35
+    usecase "Analyser métriques" as UC_P36
+    usecase "Comparer planifié/réalisé" as UC_P37
+    usecase "Évaluer performance" as UC_P38
+    usecase "Exporter données projet" as UC_P39
+  }
+  
+  package "Clôture et Archivage" {
+    usecase "Finaliser projet" as UC_P40
+    usecase "Valider livrables" as UC_P41
+    usecase "Clôturer projet" as UC_P42
+    usecase "Archiver projet" as UC_P43
+    usecase "Capitaliser expérience" as UC_P44
+  }
+}
+
+' Relations avec l'acteur principal
+RSI --> UC_P01
+RSI --> UC_P08
+RSI --> UC_P13
+RSI --> UC_P14
+RSI --> UC_P15
+RSI --> UC_P20
+RSI --> UC_P25
+RSI --> UC_P30
+RSI --> UC_P35
+RSI --> UC_P40
+
+' Relations d'inclusion (include)
+UC_P01 .> UC_P02 : <<include>>
+UC_P01 .> UC_P03 : <<include>>
+UC_P01 .> UC_P04 : <<include>>
+UC_P02 .> UC_P05 : <<include>>
+UC_P02 .> UC_P06 : <<include>>
+UC_P13 .> UC_P15 : <<include>>
+UC_P13 .> UC_P31 : <<include>>
+UC_P15 .> UC_P16 : <<include>>
+UC_P20 .> UC_P21 : <<include>>
+UC_P25 .> UC_P27 : <<include>>
+UC_P35 .> UC_P36 : <<include>>
+UC_P40 .> UC_P41 : <<include>>
+UC_P42 .> UC_P43 : <<include>>
+
+' Relations d'extension (extend)
+UC_P07 .> UC_P01 : <<extend>>
+UC_P09 .> UC_P08 : <<extend>>
+UC_P11 .> UC_P08 : <<extend>>
+UC_P12 .> UC_P08 : <<extend>>
+UC_P17 .> UC_P15 : <<extend>>
+UC_P18 .> UC_P17 : <<extend>>
+UC_P19 .> UC_P15 : <<extend>>
+UC_P22 .> UC_P20 : <<extend>>
+UC_P24 .> UC_P21 : <<extend>>
+UC_P26 .> UC_P25 : <<extend>>
+UC_P28 .> UC_P25 : <<extend>>
+UC_P29 .> UC_P28 : <<extend>>
+UC_P32 .> UC_P31 : <<extend>>
+UC_P33 .> UC_P30 : <<extend>>
+UC_P34 .> UC_P31 : <<extend>>
+UC_P37 .> UC_P35 : <<extend>>
+UC_P38 .> UC_P36 : <<extend>>
+UC_P39 .> UC_P35 : <<extend>>
+UC_P44 .> UC_P42 : <<extend>>
+
+' Relations de précédence
+UC_P02 --> UC_P08 : <<precedes>>
+UC_P04 --> UC_P15 : <<precedes>>
+UC_P08 --> UC_P28 : <<precedes>>
+UC_P15 --> UC_P17 : <<precedes>>
+UC_P17 --> UC_P18 : <<precedes>>
+UC_P31 --> UC_P32 : <<precedes>>
+UC_P41 --> UC_P42 : <<precedes>>
+UC_P42 --> UC_P43 : <<precedes>>
+
+' Dépendances externes (vers autres modules)
+UC_P30 --> "Gestion Tickets" : <<depends>>
+UC_P28 --> "Communication" : <<depends>>
+UC_P35 --> "Export/Reporting" : <<depends>>
+
+' Notes explicatives
+note right of UC_P01 : Point d'entrée principal\ndu module projet
+note right of UC_P16 : Calcul automatique basé\nsur les tickets résolus
+note right of UC_P17 : Détection automatique\nselon dates planifiées
+note right of UC_P27 : Traçabilité complète\nde toutes les actions
+note right of UC_P31 : Vue consolidée\ntickets/projet
+note right of UC_P36 : KPI projet :\n- Délais\n- Budget\n- Qualité
+
+' Contraintes et règles métier
+note top of UC_P04 : **Contrainte :**\nDate fin > Date début
+note top of UC_P42 : **Règle :**\nTous tickets associés\ndoivent être fermés
+note bottom of UC_P08 : **Règle :**\nUn seul sous-traitant\nprincipal par projet
+
+' Workflow principal
+note bottom : **Workflow principal Gestion Projet :**\n1. Création → Définition infos de base\n2. Association sous-traitant → Communication\n3. Suivi continu → Détection retards\n4. Gestion tickets associés → Résolution\n5. Finalisation → Clôture → Archivage\n\n**États projet :** Planifié → En cours → En attente → Terminé → Archivé
+
+@enduml
