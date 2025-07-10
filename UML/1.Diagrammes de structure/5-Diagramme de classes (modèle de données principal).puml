@@ -1,0 +1,318 @@
+@startuml
+!theme plain
+title Diagramme de Classes - Modèle de Données Principal\nApplication RSI Django
+
+' Configuration de style
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+package "Gestion des Projets" {
+    class Project {
+        -id: BigInteger <<PK>>
+        -name: CharField(200) <<unique>>
+        -description: TextField
+        -start_date: DateField
+        -end_date: DateField
+        -status: CharField(20)
+        -priority: CharField(10)
+        -budget: DecimalField
+        -progress_percentage: IntegerField
+        -tags: CharField(200)
+        -created_at: DateTimeField
+        -updated_at: DateTimeField
+        --
+        +calculate_progress(): int
+        +is_overdue(): boolean
+        +get_active_tickets(): QuerySet
+        +get_status_display(): str
+    }
+}
+
+package "Gestion des Sous-traitants" {
+    class Contractor {
+        -id: BigInteger <<PK>>
+        -name: CharField(100) <<unique>>
+        -company: CharField(150)
+        -contact_email: EmailField
+        -phone: CharField(20)
+        -address: TextField
+        -specialties: TextField
+        -contract_start: DateField
+        -contract_end: DateField
+        -sla_response_time: IntegerField
+        -sla_resolution_time: IntegerField
+        -is_active: BooleanField
+        -performance_rating: DecimalField
+        -created_at: DateTimeField
+        --
+        +get_active_tickets(): QuerySet
+        +calculate_performance(): decimal
+        +is_available(): boolean
+        +get_sla_for_priority(priority): dict
+    }
+}
+
+package "Gestion des Problèmes" {
+    class Problem {
+        -id: BigInteger <<PK>>
+        -title: CharField(200)
+        -description: TextField
+        -source: CharField(50)
+        -urgency: CharField(10)
+        -impact: CharField(10)
+        -criticality: CharField(10)
+        -affected_user: CharField(100)
+        -affected_service: CharField(100)
+        -affected_equipment: CharField(200)
+        -user_count_impacted: IntegerField
+        -business_impact: TextField
+        -temporary_solution: TextField
+        -root_cause: TextField
+        -created_at: DateTimeField
+        -discovered_at: DateTimeField
+        --
+        +calculate_criticality(): str
+        +get_similar_problems(): QuerySet
+        +create_ticket(): Ticket
+        +estimate_resolution_time(): int
+    }
+}
+
+package "Gestion des Tickets" {
+    class Ticket {
+        -id: BigInteger <<PK>>
+        -number: CharField(20) <<unique>>
+        -status: CharField(20)
+        -priority: CharField(10)
+        -assigned_at: DateTimeField
+        -sla_deadline: DateTimeField
+        -estimated_resolution: DateTimeField
+        -actual_resolution: DateTimeField
+        -resolution_time_minutes: IntegerField
+        -is_sla_respected: BooleanField
+        -closure_reason: CharField(50)
+        -satisfaction_rating: IntegerField
+        -created_at: DateTimeField
+        -updated_at: DateTimeField
+        --
+        +generate_number(): str
+        +calculate_sla_deadline(): datetime
+        +is_overdue(): boolean
+        +get_time_remaining(): timedelta
+        +change_status(new_status): void
+        +assign_to_contractor(contractor): void
+    }
+
+    class TicketStatusHistory {
+        -id: BigInteger <<PK>>
+        -old_status: CharField(20)
+        -new_status: CharField(20)
+        -change_reason: TextField
+        -changed_at: DateTimeField
+        -duration_in_status: IntegerField
+        --
+        +calculate_duration(): int
+    }
+}
+
+package "Communication" {
+    class Communication {
+        -id: BigInteger <<PK>>
+        -type: CharField(20)
+        -direction: CharField(10)
+        -subject: CharField(200)
+        -content: TextField
+        -recipient_email: EmailField
+        -sender_email: EmailField
+        -is_read: BooleanField
+        -response_required: BooleanField
+        -response_deadline: DateTimeField
+        -created_at: DateTimeField
+        --
+        +mark_as_read(): void
+        +is_response_overdue(): boolean
+        +generate_email_template(): str
+    }
+
+    class EmailTemplate {
+        -id: BigInteger <<PK>>
+        -name: CharField(100)
+        -subject_template: CharField(200)
+        -body_template: TextField
+        -template_type: CharField(30)
+        -is_active: BooleanField
+        -created_at: DateTimeField
+        --
+        +render_template(context): dict
+    }
+}
+
+package "Fichiers et Documents" {
+    class Attachment {
+        -id: BigInteger <<PK>>
+        -file_name: CharField(255)
+        -original_name: CharField(255)
+        -file_path: FileField
+        -file_size: BigIntegerField
+        -file_type: CharField(50)
+        -description: CharField(500)
+        -uploaded_at: DateTimeField
+        --
+        +get_file_url(): str
+        +is_image(): boolean
+        +get_human_size(): str
+    }
+}
+
+package "Configuration et Paramètres" {
+    class UserSettings {
+        -id: BigInteger <<PK>>
+        -company_name: CharField(100)
+        -user_name: CharField(100)
+        -user_email: EmailField
+        -email_signature: TextField
+        -default_sla_response_hours: IntegerField
+        -default_sla_resolution_hours: IntegerField
+        -notification_delay_days: IntegerField
+        -tickets_per_page: IntegerField
+        -dashboard_refresh_minutes: IntegerField
+        -auto_relance_enabled: BooleanField
+        -created_at: DateTimeField
+        -updated_at: DateTimeField
+        --
+        +get_sla_defaults(): dict
+        +get_notification_settings(): dict
+    }
+
+    class NotificationRule {
+        -id: BigInteger <<PK>>
+        -name: CharField(100)
+        -condition_type: CharField(30)
+        -condition_value: CharField(100)
+        -action_type: CharField(30)
+        -delay_hours: IntegerField
+        -is_active: BooleanField
+        -priority_filter: CharField(10)
+        -created_at: DateTimeField
+        --
+        +evaluate_condition(ticket): boolean
+        +execute_action(ticket): void
+    }
+}
+
+package "Choix et Constantes" {
+    enum ProjectStatus {
+        PLANNED
+        IN_PROGRESS
+        ON_HOLD
+        COMPLETED
+        CANCELLED
+        ARCHIVED
+    }
+
+    enum TicketStatus {
+        NEW
+        ASSIGNED
+        IN_PROGRESS
+        WAITING
+        TESTING
+        RESOLVED
+        CLOSED
+        CANCELLED
+        REOPENED
+    }
+
+    enum Priority {
+        LOW
+        NORMAL
+        HIGH
+        CRITICAL
+    }
+
+    enum Urgency {
+        LOW
+        MEDIUM
+        HIGH
+        CRITICAL
+    }
+
+    enum CommunicationType {
+        EMAIL
+        PHONE
+        NOTE
+        SMS
+        MEETING
+    }
+}
+
+' Relations principales
+
+' Projet vers Sous-traitant
+Project ||--o{ Contractor : "contractor_id"
+Project ||--o{ Ticket : "project_id"
+
+' Problème vers Ticket (relation 1:1)
+Problem ||--|| Ticket : "problem_id"
+
+' Ticket vers Sous-traitant
+Ticket }o--|| Contractor : "contractor_id"
+
+' Ticket vers Communications
+Ticket ||--o{ Communication : "ticket_id"
+
+' Ticket vers Historique statuts
+Ticket ||--o{ TicketStatusHistory : "ticket_id"
+
+' Communications et Pièces jointes
+Communication ||--o{ Attachment : "communication_id"
+Ticket ||--o{ Attachment : "ticket_id"
+Project ||--o{ Attachment : "project_id"
+Problem ||--o{ Attachment : "problem_id"
+
+' Relations avec enums
+Project ||--|| ProjectStatus : status
+Ticket ||--|| TicketStatus : status
+Ticket ||--|| Priority : priority
+Problem ||--|| Urgency : urgency
+Communication ||--|| CommunicationType : type
+
+' Configuration
+UserSettings ||--o{ NotificationRule : settings_id
+NotificationRule }o--|| Priority : priority_filter
+
+' Notes et contraintes
+note right of Project : Un projet peut avoir\nplusieurs tickets associés\nmais un seul sous-traitant principal
+
+note right of Ticket : Numérotation automatique\nformat: TICK-YYYY-NNNN\nSLA calculé selon priorité
+
+note right of Problem : Chaque problème génère\nautomatiquement un ticket\nrelation 1:1 obligatoire
+
+note right of Communication : Direction: SENT/RECEIVED\nType: EMAIL/PHONE/NOTE\nTraçabilité complète
+
+note bottom of TicketStatusHistory : Historique complet\nde tous les changements\navec durée dans chaque statut
+
+note top of UserSettings : Configuration globale\npour utilisateur unique\nPas de gestion multi-users
+
+' Contraintes métier
+note as N1
+    **Contraintes métier principales:**
+    • Un ticket ne peut être assigné qu'à un seul sous-traitant
+    • Un problème génère automatiquement un ticket
+    • Le SLA est calculé automatiquement selon la priorité
+    • L'historique des statuts est obligatoire pour traçabilité
+    • Les notifications sont configurables par règles
+end note
+
+' Règles de gestion
+note as N2
+    **Règles de calcul:**
+    • Criticité = Urgence × Impact
+    • SLA deadline = created_at + sla_time (selon priorité)
+    • Progress = (tickets_closed / total_tickets) × 100
+    • Performance = (sla_respected / total_tickets) × 100
+end note
+
+@enduml
