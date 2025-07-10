@@ -1,0 +1,173 @@
+@startuml
+!theme plain
+title Diagramme de Cas d'Utilisation - Application RSI Django\nGestion de Projets et Tickets
+
+left to right direction
+
+actor "RSI\n(Responsable SI)" as RSI
+
+package "Gestion des Projets" {
+  usecase "Créer un projet" as UC01
+  usecase "Modifier un projet" as UC02
+  usecase "Consulter projet" as UC03
+  usecase "Associer sous-traitant" as UC04
+  usecase "Suivre avancement" as UC05
+  usecase "Clôturer projet" as UC06
+}
+
+package "Gestion des Problèmes" {
+  usecase "Déclarer problème" as UC07
+  usecase "Analyser problème" as UC08
+  usecase "Définir priorité" as UC09
+  usecase "Décider traitement" as UC10
+  usecase "Documenter solution" as UC11
+}
+
+package "Gestion des Tickets" {
+  usecase "Créer ticket" as UC12
+  usecase "Assigner ticket" as UC13
+  usecase "Modifier statut" as UC14
+  usecase "Suivre progression" as UC15
+  usecase "Valider résolution" as UC16
+  usecase "Fermer ticket" as UC17
+  usecase "Rouvrir ticket" as UC18
+}
+
+package "Communication" {
+  usecase "Rédiger email" as UC19
+  usecase "Envoyer à sous-traitant" as UC20
+  usecase "Enregistrer échange" as UC21
+  usecase "Suivre réponses" as UC22
+  usecase "Gérer pièces jointes" as UC23
+}
+
+package "Recherche et Filtrage" {
+  usecase "Rechercher tickets" as UC24
+  usecase "Filtrer par statut" as UC25
+  usecase "Filtrer par projet" as UC26
+  usecase "Filtrer par sous-traitant" as UC27
+  usecase "Filtrer par date" as UC28
+  usecase "Sauvegarder recherche" as UC29
+}
+
+package "Tableau de Bord" {
+  usecase "Consulter indicateurs" as UC30
+  usecase "Visualiser graphiques" as UC31
+  usecase "Voir tickets prioritaires" as UC32
+  usecase "Contrôler SLA" as UC33
+  usecase "Analyser performance" as UC34
+}
+
+package "Notifications" {
+  usecase "Configurer alertes" as UC35
+  usecase "Recevoir rappels" as UC36
+  usecase "Gérer notifications" as UC37
+  usecase "Paramétrer délais" as UC38
+}
+
+package "Export et Reporting" {
+  usecase "Exporter en PDF" as UC39
+  usecase "Exporter en Excel" as UC40
+  usecase "Générer rapport mensuel" as UC41
+  usecase "Créer rapport sous-traitant" as UC42
+  usecase "Analyser tendances" as UC43
+}
+
+package "Administration" {
+  usecase "Gérer sous-traitants" as UC44
+  usecase "Configurer paramètres" as UC45
+  usecase "Sauvegarder données" as UC46
+  usecase "Importer données" as UC47
+}
+
+' Relations principales
+RSI --> UC01
+RSI --> UC02
+RSI --> UC03
+RSI --> UC04
+RSI --> UC05
+RSI --> UC06
+
+RSI --> UC07
+RSI --> UC08
+RSI --> UC09
+RSI --> UC10
+RSI --> UC11
+
+RSI --> UC12
+RSI --> UC13
+RSI --> UC14
+RSI --> UC15
+RSI --> UC16
+RSI --> UC17
+RSI --> UC18
+
+RSI --> UC19
+RSI --> UC20
+RSI --> UC21
+RSI --> UC22
+RSI --> UC23
+
+RSI --> UC24
+RSI --> UC25
+RSI --> UC26
+RSI --> UC27
+RSI --> UC28
+RSI --> UC29
+
+RSI --> UC30
+RSI --> UC31
+RSI --> UC32
+RSI --> UC33
+RSI --> UC34
+
+RSI --> UC35
+RSI --> UC36
+RSI --> UC37
+RSI --> UC38
+
+RSI --> UC39
+RSI --> UC40
+RSI --> UC41
+RSI --> UC42
+RSI --> UC43
+
+RSI --> UC44
+RSI --> UC45
+RSI --> UC46
+RSI --> UC47
+
+' Relations d'inclusion et d'extension
+UC07 .> UC12 : <<include>>
+UC10 .> UC13 : <<include>>
+UC13 .> UC19 : <<include>>
+UC19 .> UC21 : <<include>>
+UC14 .> UC36 : <<extend>>
+UC15 .> UC33 : <<include>>
+UC16 .> UC17 : <<include>>
+UC30 .> UC32 : <<include>>
+UC30 .> UC33 : <<include>>
+UC41 .> UC39 : <<extend>>
+UC41 .> UC40 : <<extend>>
+
+' Relations entre cas d'utilisation
+UC08 --> UC09 : <<precedes>>
+UC09 --> UC10 : <<precedes>>
+UC10 --> UC12 : <<precedes>>
+UC12 --> UC13 : <<precedes>>
+UC13 --> UC14 : <<precedes>>
+UC20 --> UC22 : <<precedes>>
+UC15 --> UC16 : <<precedes>>
+UC16 --> UC17 : <<precedes>>
+
+' Notes explicatives
+note right of UC07 : Déclencheur principal\ndu processus
+note right of UC12 : Génération automatique\ndepuis problème
+note right of UC20 : Avec modèles\nprédéfinis
+note right of UC36 : Automatique selon\nparamètres configurés
+note right of UC33 : Calcul automatique\ndes délais
+
+' Légende
+note bottom : **Workflow principal :**\n1. Déclaration problème → Création ticket\n2. Assignation → Communication\n3. Suivi → Résolution → Fermeture\n\n**Fonctionnalités transverses :**\n- Recherche et filtrage\n- Notifications automatiques\n- Reporting et export
+
+@enduml
