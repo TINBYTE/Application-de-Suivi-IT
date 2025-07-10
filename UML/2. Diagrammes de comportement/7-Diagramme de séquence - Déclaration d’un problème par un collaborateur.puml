@@ -1,0 +1,168 @@
+@startuml
+!theme plain
+title Diagramme de Séquence - Déclaration d'un Problème par un Collaborateur
+
+' Acteurs et participants
+actor "Collaborateur" as COLLAB
+participant "RSI" as RSI
+participant "ProblemForm" as FORM
+participant "ProblemService" as PROB_SVC
+participant "CriticalityCalculator" as CALC
+participant "TicketService" as TICKET_SVC
+participant "SLAManager" as SLA
+participant "EmailService" as EMAIL
+participant "Database" as DB
+participant "Sous-traitant" as CONTRACTOR
+
+' === PHASE 1: SIGNALEMENT INITIAL ===
+group #LightBlue Signalement Initial du Problème
+    COLLAB -> RSI : Signale problème\n(email, téléphone, visite)
+    note right : "Serveur mail inaccessible\ndepuis ce matin\n50 utilisateurs impactés"
+    
+    RSI -> RSI : Évaluation initiale\ndu problème signalé
+    
+    RSI -> FORM : Accède au formulaire\nde déclaration problème
+    activate FORM
+    
+    FORM -> RSI : Affiche formulaire vide
+    
+    RSI -> FORM : Saisit informations problème
+    note right : • Titre\n• Description détaillée\n• Collaborateur concerné\n• Service impacté\n• Équipement défaillant\n• Nombre utilisateurs
+    
+    FORM -> FORM : Validation des champs\nobligatoires
+end
+
+' === PHASE 2: TRAITEMENT ET ANALYSE ===
+group #LightGreen Analyse et Catégorisation
+    FORM -> PROB_SVC : Soumet données problème
+    activate PROB_SVC
+    
+    PROB_SVC -> PROB_SVC : Validation métier\ndes données
+    
+    PROB_SVC -> CALC : Calcule criticité
+    activate CALC
+    
+    CALC -> CALC : Évalue urgence\n(impact utilisateurs)
+    CALC -> CALC : Évalue impact métier\n(service critique)
+    CALC -> CALC : Calcule criticité\n= Urgence × Impact
+    
+    CALC -> PROB_SVC : Retourne criticité\n"ELEVEE"
+    deactivate CALC
+    
+    PROB_SVC -> DB : Enregistre nouveau problème
+    activate DB
+    DB -> PROB_SVC : Retourne Problem.id
+    deactivate DB
+    
+    PROB_SVC -> FORM : Confirme enregistrement
+    deactivate PROB_SVC
+    
+    FORM -> RSI : Affiche récapitulatif\n+ criticité calculée
+    deactivate FORM
+end
+
+' === PHASE 3: DÉCISION DE TRAITEMENT ===
+group #LightYellow Décision de Traitement
+    RSI -> RSI : Analyse capacités internes\nvs expertise requise
+    
+    alt Traitement interne possible
+        RSI -> RSI : Décide traitement interne
+        note right : Compétence disponible\nProblème connu\nSolution < 4h
+    else Expertise externe requise  
+        RSI -> RSI : Décide sous-traitance
+        note right : Problème complexe\nExpertise spécialisée\nMatériel spécifique
+        RSI -> RSI : Sélectionne sous-traitant\napproprié
+    end
+end
+
+' === PHASE 4: CRÉATION TICKET AUTOMATIQUE ===
+group #LightCyan Génération Automatique du Ticket
+    RSI -> TICKET_SVC : Demande création ticket\navec décision traitement
+    activate TICKET_SVC
+    
+    TICKET_SVC -> TICKET_SVC : Génère numéro ticket\nTICK-2024-0123
+    
+    TICKET_SVC -> SLA : Calcule SLA selon criticité
+    activate SLA
+    SLA -> SLA : Criticité ELEVEE\n→ SLA 4h réponse, 24h résolution
+    SLA -> TICKET_SVC : Retourne délais SLA
+    deactivate SLA
+    
+    TICKET_SVC -> DB : Crée nouveau ticket
+    activate DB
+    note right : • Lié au problème 1:1\n• Statut: NOUVEAU\n• SLA deadline calculé\n• Contractor assigné
+    DB -> TICKET_SVC : Confirme création\nTicket.id
+    deactivate DB
+    
+    TICKET_SVC -> TICKET_SVC : Met à jour statut\nNOUVEAU → ASSIGNE
+    
+    TICKET_SVC -> RSI : Retourne ticket créé\navec numéro
+    deactivate TICKET_SVC
+end
+
+' === PHASE 5: TRANSMISSION SOUS-TRAITANT ===
+group #Orange Transmission au Sous-traitant (si externe)
+    alt Assignation sous-traitant
+        RSI -> EMAIL : Prépare email assignation
+        activate EMAIL
+        
+        EMAIL -> EMAIL : Charge template email\n"Assignation Ticket"
+        
+        EMAIL -> EMAIL : Remplit template avec\ninformations ticket
+        note right : • Numéro ticket\n• Description problème\n• Criticité et SLA\n• Informations contact
+        
+        EMAIL -> CONTRACTOR : Envoie email assignation
+        note right : Objet: [TICKET #TICK-2024-0123]\nServeur mail inaccessible
+        
+        EMAIL -> DB : Enregistre communication\nenvoyée
+        activate DB
+        DB -> EMAIL : Confirme enregistrement
+        deactivate DB
+        
+        EMAIL -> RSI : Confirme envoi email
+        deactivate EMAIL
+        
+        CONTRACTOR -> CONTRACTOR : Reçoit notification\nAnalyse ticket
+        
+        CONTRACTOR -> EMAIL : Accuse réception\n(optionnel)
+        
+        EMAIL -> DB : Enregistre accusé réception
+        activate DB
+        DB -> EMAIL : Confirme enregistrement
+        deactivate DB
+        
+        EMAIL -> RSI : Notifie accusé réception
+    end
+end
+
+' === PHASE 6: FINALISATION ET SUIVI ===
+group #Pink Finalisation et Mise en Suivi
+    RSI -> PROB_SVC : Marque problème\ncomme "En traitement"
+    activate PROB_SVC
+    
+    PROB_SVC -> DB : Met à jour statut problème
+    activate DB
+    DB -> PROB_SVC : Confirme mise à jour
+    deactivate DB
+    deactivate PROB_SVC
+    
+    RSI -> COLLAB : Informe de la prise en compte
+    note right : "Votre problème est pris\nen compte sous le ticket\n#TICK-2024-0123\nRésolution prévue: 17h"
+    
+    ' Déclenchement automatique du monitoring
+    note over TICKET_SVC, SLA #FFAAAA : **Monitoring automatique activé**\n• Surveillance SLA\n• Relances programmées\n• Alertes si retard
+end
+
+' Notes explicatives
+note right of RSI : Le RSI centralise\ntoutes les déclarations\net pilote le processus
+
+note right of CALC : Calcul automatique\nselon matrice:\nCritique = Urgence × Impact
+
+note right of TICKET_SVC : Génération automatique\ndu ticket avec toutes\nles informations du problème
+
+note over EMAIL, CONTRACTOR : Communication\nautomatique via\ntemplates prédéfinis
+
+' Résultat final
+note over COLLAB, CONTRACTOR #LIGHTGREEN : **Résultat:**\n• Problème tracé dans le système\n• Ticket créé avec SLA approprié\n• Sous-traitant notifié et en action\n• Collaborateur informé du suivi\n• Monitoring automatique actif
+
+@enduml
