@@ -1,0 +1,204 @@
+@startuml
+!theme plain
+title Diagramme de Cas d'Utilisation - Module Déclaration des Problèmes\nApplication RSI Django
+
+left to right direction
+
+actor "RSI\n(Responsable SI)" as RSI
+actor "Collaborateur\n(Déclarant)" as COLLAB
+
+package "Déclaration des Problèmes" {
+  
+  package "Saisie Initiale" {
+    usecase "Déclarer nouveau problème" as UC_D01
+    usecase "Saisir titre problème" as UC_D02
+    usecase "Décrire problème détaillé" as UC_D03
+    usecase "Identifier source problème" as UC_D04
+    usecase "Renseigner contexte" as UC_D05
+    usecase "Joindre captures d'écran" as UC_D06
+    usecase "Ajouter fichiers diagnostic" as UC_D07
+    usecase "Enregistrer témoignage utilisateur" as UC_D08
+  }
+  
+  package "Identification et Localisation" {
+    usecase "Identifier collaborateur concerné" as UC_D09
+    usecase "Spécifier service impacté" as UC_D10
+    usecase "Localiser équipement défaillant" as UC_D11
+    usecase "Identifier système concerné" as UC_D12
+    usecase "Définir périmètre impact" as UC_D13
+    usecase "Évaluer nombre utilisateurs" as UC_D14
+    usecase "Cartographier dépendances" as UC_D15
+  }
+  
+  package "Analyse et Diagnostic" {
+    usecase "Analyser symptômes" as UC_D16
+    usecase "Rechercher causes probables" as UC_D17
+    usecase "Consulter historique similaire" as UC_D18
+    usecase "Effectuer tests diagnostic" as UC_D19
+    usecase "Vérifier logs système" as UC_D20
+    usecase "Analyser performances" as UC_D21
+    usecase "Identifier cause racine" as UC_D22
+  }
+  
+  package "Catégorisation et Priorisation" {
+    usecase "Définir catégorie problème" as UC_D23
+    usecase "Évaluer niveau urgence" as UC_D24
+    usecase "Calculer criticité métier" as UC_D25
+    usecase "Estimer temps résolution" as UC_D26
+    usecase "Définir priorité finale" as UC_D27
+    usecase "Associer SLA approprié" as UC_D28
+    usecase "Valider classification" as UC_D29
+  }
+  
+  package "Décision de Traitement" {
+    usecase "Analyser capacités internes" as UC_D30
+    usecase "Évaluer complexité technique" as UC_D31
+    usecase "Décider traitement interne" as UC_D32
+    usecase "Sélectionner sous-traitant" as UC_D33
+    usecase "Justifier choix traitement" as UC_D34
+    usecase "Planifier intervention" as UC_D35
+    usecase "Définir ressources nécessaires" as UC_D36
+  }
+  
+  package "Solution Temporaire" {
+    usecase "Identifier contournement" as UC_D37
+    usecase "Implémenter solution temporaire" as UC_D38
+    usecase "Tester contournement" as UC_D39
+    usecase "Communiquer aux utilisateurs" as UC_D40
+    usecase "Documenter procédure" as UC_D41
+    usecase "Surveiller efficacité" as UC_D42
+  }
+  
+  package "Documentation et Traçabilité" {
+    usecase "Enregistrer chronologie" as UC_D43
+    usecase "Documenter actions menées" as UC_D44
+    usecase "Archiver preuves" as UC_D45
+    usecase "Créer base connaissance" as UC_D46
+    usecase "Référencer documentation" as UC_D47
+    usecase "Mettre à jour procédures" as UC_D48
+  }
+  
+  package "Validation et Transmission" {
+    usecase "Valider informations saisies" as UC_D49
+    usecase "Vérifier complétude" as UC_D50
+    usecase "Générer numéro problème" as UC_D51
+    usecase "Créer ticket associé" as UC_D52
+    usecase "Notifier parties prenantes" as UC_D53
+    usecase "Transmettre au traitement" as UC_D54
+  }
+}
+
+' Relations acteurs principaux
+RSI --> UC_D01
+RSI --> UC_D16
+RSI --> UC_D23
+RSI --> UC_D30
+RSI --> UC_D37
+RSI --> UC_D43
+RSI --> UC_D49
+
+' Relations acteur secondaire (cas spécifique)
+COLLAB --> UC_D08 : peut contribuer
+COLLAB --> UC_D05 : fournit contexte
+
+' Relations d'inclusion (include) - obligatoires
+UC_D01 .> UC_D02 : <<include>>
+UC_D01 .> UC_D03 : <<include>>
+UC_D01 .> UC_D04 : <<include>>
+UC_D16 .> UC_D17 : <<include>>
+UC_D16 .> UC_D18 : <<include>>
+UC_D23 .> UC_D24 : <<include>>
+UC_D24 .> UC_D25 : <<include>>
+UC_D25 .> UC_D27 : <<include>>
+UC_D30 .> UC_D31 : <<include>>
+UC_D37 .> UC_D38 : <<include>>
+UC_D43 .> UC_D44 : <<include>>
+UC_D49 .> UC_D50 : <<include>>
+UC_D49 .> UC_D51 : <<include>>
+
+' Relations d'extension (extend) - optionnelles
+UC_D05 .> UC_D01 : <<extend>>
+UC_D06 .> UC_D03 : <<extend>>
+UC_D07 .> UC_D03 : <<extend>>
+UC_D08 .> UC_D05 : <<extend>>
+UC_D09 .> UC_D01 : <<extend>>
+UC_D10 .> UC_D09 : <<extend>>
+UC_D11 .> UC_D10 : <<extend>>
+UC_D12 .> UC_D11 : <<extend>>
+UC_D13 .> UC_D12 : <<extend>>
+UC_D14 .> UC_D13 : <<extend>>
+UC_D15 .> UC_D13 : <<extend>>
+UC_D19 .> UC_D16 : <<extend>>
+UC_D20 .> UC_D19 : <<extend>>
+UC_D21 .> UC_D19 : <<extend>>
+UC_D22 .> UC_D17 : <<extend>>
+UC_D26 .> UC_D24 : <<extend>>
+UC_D28 .> UC_D27 : <<extend>>
+UC_D29 .> UC_D27 : <<extend>>
+UC_D33 .> UC_D30 : <<extend>>
+UC_D34 .> UC_D32 : <<extend>>
+UC_D34 .> UC_D33 : <<extend>>
+UC_D35 .> UC_D32 : <<extend>>
+UC_D35 .> UC_D33 : <<extend>>
+UC_D36 .> UC_D35 : <<extend>>
+UC_D39 .> UC_D38 : <<extend>>
+UC_D40 .> UC_D38 : <<extend>>
+UC_D41 .> UC_D38 : <<extend>>
+UC_D42 .> UC_D41 : <<extend>>
+UC_D45 .> UC_D43 : <<extend>>
+UC_D46 .> UC_D44 : <<extend>>
+UC_D47 .> UC_D46 : <<extend>>
+UC_D48 .> UC_D47 : <<extend>>
+UC_D52 .> UC_D51 : <<extend>>
+UC_D53 .> UC_D52 : <<extend>>
+UC_D54 .> UC_D52 : <<extend>>
+
+' Relations de précédence (workflow)
+UC_D03 --> UC_D16 : <<precedes>>
+UC_D17 --> UC_D23 : <<precedes>>
+UC_D27 --> UC_D30 : <<precedes>>
+UC_D31 --> UC_D32 : <<precedes>>
+UC_D31 --> UC_D33 : <<precedes>>
+UC_D25 --> UC_D37 : <<precedes>>
+UC_D32 --> UC_D43 : <<precedes>>
+UC_D33 --> UC_D43 : <<precedes>>
+UC_D44 --> UC_D49 : <<precedes>>
+UC_D51 --> UC_D52 : <<precedes>>
+
+' Dépendances vers autres modules
+UC_D52 --> "Gestion Tickets" : <<creates>>
+UC_D33 --> "Gestion Sous-traitants" : <<depends>>
+UC_D40 --> "Communication" : <<depends>>
+UC_D46 --> "Base Connaissance" : <<depends>>
+
+' Points de décision
+UC_D31 --> UC_D32 : Si capacité interne
+UC_D31 --> UC_D33 : Si expertise externe
+UC_D25 --> UC_D37 : Si impact critique
+
+' Notes explicatives
+note right of UC_D01 : Point d'entrée du processus\nDéclenchement possible par :\n- Utilisateur\n- Monitoring\n- Maintenance préventive
+
+note right of UC_D18 : Recherche dans historique\npour problèmes similaires\n→ Gain de temps diagnostic
+
+note right of UC_D25 : Criticité = Urgence × Impact\nMatrice de criticité métier\npour priorisation
+
+note right of UC_D28 : SLA automatique selon :\n- Priorité définie\n- Type de service\n- Contrat sous-traitant
+
+note right of UC_D37 : Si criticité élevée :\nSolution temporaire obligatoire\nPour maintenir service
+
+note right of UC_D52 : Génération automatique ticket\navec toutes les informations\ndu problème analysé
+
+' Règles métier et contraintes
+note top of UC_D24 : **Niveaux urgence :**\n- Critique : Service arrêté\n- Élevée : Dégradation majeure\n- Moyenne : Gêne utilisateur\n- Faible : Amélioration
+
+note top of UC_D27 : **Matrice priorité :**\nCritique + Forte urgence = P1\nÉlevée + Moyenne urgence = P2\nNormale + Faible urgence = P3
+
+note bottom of UC_D32 : **Critères traitement interne :**\n- Compétence disponible\n- Temps de résolution < 4h\n- Problème récurrent connu
+
+note bottom of UC_D33 : **Critères sous-traitance :**\n- Expertise spécialisée requise\n- Matériel spécifique\n- Garantie constructeur
+
+' Workflow principal et états
+note bottom : **Workflow principal Déclaration :**\n1. Saisie → Identification → Analyse\n2. Catégorisation → Priorisation\n3. Décision traitement → Documentation\n4. Validation → Création ticket\n\n**États problème :** Déclaré → Analysé → Catégorisé → Assigné → En traitement
+
+@enduml
