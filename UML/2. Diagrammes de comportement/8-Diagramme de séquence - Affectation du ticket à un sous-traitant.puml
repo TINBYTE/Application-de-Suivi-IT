@@ -1,0 +1,197 @@
+@startuml
+!theme plain
+title Diagramme de Séquence - Affectation d'un Ticket à un Sous-traitant
+
+' Acteurs et participants
+actor "RSI" as RSI
+participant "TicketDetailView" as VIEW
+participant "ContractorService" as CONTRACTOR_SVC
+participant "TicketService" as TICKET_SVC
+participant "SLAManager" as SLA
+participant "EmailService" as EMAIL
+participant "TemplateEngine" as TEMPLATE
+participant "NotificationService" as NOTIF
+participant "Database" as DB
+participant "Sous-traitant" as CONTRACTOR
+
+' === PHASE 1: CONSULTATION ET DÉCISION ===
+group #LightBlue Consultation du Ticket et Décision d'Assignation
+    RSI -> VIEW : Consulte détail ticket\n#TICK-2024-0123
+    activate VIEW
+    
+    VIEW -> DB : Récupère données ticket complet
+    activate DB
+    DB -> VIEW : Retourne ticket + problème\n+ historique
+    deactivate DB
+    
+    VIEW -> RSI : Affiche détail ticket
+    note right : • Statut: NOUVEAU\n• Priorité: ÉLEVÉE\n• Problème: Serveur mail HS\n• Pas encore assigné
+    
+    RSI -> RSI : Analyse technique\ndu problème
+    note right : • Complexité: Expertise messagerie\n• Urgence: 50 utilisateurs impactés\n• Décision: Sous-traitance requise
+    
+    RSI -> VIEW : Clique "Assigner à sous-traitant"
+    
+    VIEW -> CONTRACTOR_SVC : Demande liste\nsous-traitants éligibles
+    activate CONTRACTOR_SVC
+end
+
+' === PHASE 2: SÉLECTION DU SOUS-TRAITANT ===
+group #LightGreen Sélection du Sous-traitant Optimal
+    CONTRACTOR_SVC -> DB : Requête sous-traitants actifs\navec expertise messagerie
+    activate DB
+    DB -> CONTRACTOR_SVC : Retourne liste candidats
+    deactivate DB
+    
+    CONTRACTOR_SVC -> CONTRACTOR_SVC : Filtre par critères
+    note right : • Spécialité: Messagerie\n• Disponibilité: Charge < 80%\n• Performance: Rating > 4/5\n• SLA compatible: < 24h résolution
+    
+    CONTRACTOR_SVC -> CONTRACTOR_SVC : Classe par score\n(performance + disponibilité)
+    
+    CONTRACTOR_SVC -> VIEW : Retourne liste triée\nsous-traitants recommandés
+    deactivate CONTRACTOR_SVC
+    
+    VIEW -> RSI : Affiche sélection avec\nrecommandations
+    note right : 1. TechCorp (★★★★★) - Dispo\n2. MailExpert (★★★★☆) - Chargé\n3. InfoService (★★★☆☆) - Dispo
+    
+    RSI -> RSI : Sélectionne TechCorp\n(meilleur score)
+    
+    RSI -> VIEW : Confirme choix TechCorp
+end
+
+' === PHASE 3: CONFIGURATION SLA ET ASSIGNATION ===
+group #LightYellow Configuration SLA et Assignation Formelle
+    VIEW -> SLA : Calcule SLA pour\nTechCorp + Priorité ÉLEVÉE
+    activate SLA
+    
+    SLA -> DB : Récupère contrat SLA TechCorp
+    activate DB
+    DB -> SLA : Retourne paramètres SLA
+    deactivate DB
+    
+    SLA -> SLA : Calcule délais selon priorité
+    note right : Priorité ÉLEVÉE + TechCorp:\n• Accusé réception: 2h\n• Première réponse: 4h\n• Résolution: 24h
+    
+    SLA -> SLA : Calcule timestamps deadline
+    note right : Création: 14:00\n• Accusé: 16:00\n• Réponse: 18:00\n• Résolution: 14:00+1j
+    
+    SLA -> VIEW : Retourne délais calculés
+    deactivate SLA
+    
+    VIEW -> TICKET_SVC : Assigne ticket à TechCorp\navec SLA calculé
+    activate TICKET_SVC
+    
+    TICKET_SVC -> DB : Met à jour ticket
+    activate DB
+    note right : • contractor_id = TechCorp\n• status = ASSIGNED\n• assigned_at = NOW()\n• sla_deadline = calculé\n• assigned_by = RSI
+    DB -> TICKET_SVC : Confirme mise à jour
+    deactivate DB
+    
+    TICKET_SVC -> DB : Crée entrée historique
+    activate DB
+    note right : StatusHistory:\n• old_status: NEW\n• new_status: ASSIGNED\n• reason: "Assigné à TechCorp"\n• changed_by: RSI
+    DB -> TICKET_SVC : Confirme historique
+    deactivate DB
+    deactivate TICKET_SVC
+end
+
+' === PHASE 4: PRÉPARATION ET ENVOI EMAIL ===
+group #Orange Préparation du Dossier de Transmission
+    VIEW -> EMAIL : Prépare email assignation\npour TechCorp
+    activate EMAIL
+    
+    EMAIL -> TEMPLATE : Charge template\n"Assignation Ticket"
+    activate TEMPLATE
+    TEMPLATE -> EMAIL : Retourne template structure
+    deactivate TEMPLATE
+    
+    EMAIL -> DB : Récupère données complètes
+    activate DB
+    note right : • Détail ticket complet\n• Informations problème\n• Historique communications\n• Pièces jointes\n• Contact demandeur
+    DB -> EMAIL : Retourne dataset complet
+    deactivate DB
+    
+    EMAIL -> TEMPLATE : Remplit template avec données
+    activate TEMPLATE
+    TEMPLATE -> TEMPLATE : Génère contenu personalisé
+    note right : • Objet: [TICKET #TICK-2024-0123] Serveur mail inaccessible\n• Corps: Infos problème + SLA + contacts\n• PJ: Captures d'écran + logs
+    TEMPLATE -> EMAIL : Retourne email finalisé
+    deactivate TEMPLATE
+    
+    EMAIL -> EMAIL : Valide contenu et PJ\n(taille, format, virus)
+end
+
+' === PHASE 5: TRANSMISSION SOUS-TRAITANT ===
+group #LightCyan Transmission et Notification
+    EMAIL -> CONTRACTOR : Envoie email assignation
+    note over CONTRACTOR : 📧 **Email reçu**\nObjet: [TICKET #TICK-2024-0123]\nServeur mail inaccessible
+    
+    EMAIL -> DB : Enregistre communication sortante
+    activate DB
+    note right : Communication:\n• type: EMAIL\n• direction: SENT\n• subject: [TICKET #...]\n• content: contenu complet\n• recipient: TechCorp\n• sent_at: NOW()
+    DB -> EMAIL : Confirme enregistrement
+    deactivate DB
+    
+    EMAIL -> NOTIF : Déclenche notifications internes
+    activate NOTIF
+    NOTIF -> NOTIF : Programme rappels automatiques
+    note right : • Si pas d'accusé dans 2h → Relance\n• Si pas de réponse dans 4h → Alerte\n• Si pas résolu dans 24h → Escalade
+    deactivate NOTIF
+    
+    EMAIL -> RSI : Confirme envoi réussi
+    deactivate EMAIL
+    
+    VIEW -> RSI : Affiche confirmation assignation
+    note right : ✓ Ticket assigné à TechCorp\n✓ Email envoyé\n✓ SLA activé: 24h\n✓ Monitoring démarré
+    deactivate VIEW
+end
+
+' === PHASE 6: RÉACTION SOUS-TRAITANT ===
+group #Pink Réception et Accusé par le Sous-traitant
+    CONTRACTOR -> CONTRACTOR : Reçoit et lit email
+    note right : • Analyse du problème\n• Vérification disponibilité\n• Estimation complexité
+    
+    CONTRACTOR -> CONTRACTOR : Prend en charge ticket\ndans son système interne
+    
+    CONTRACTOR -> EMAIL : Envoie accusé de réception
+    note right : "Accusé réception ticket\n#TICK-2024-0123\nPrise en charge confirmée\nAnalyse en cours"
+    
+    EMAIL -> DB : Enregistre communication entrante
+    activate DB
+    note right : Communication:\n• type: EMAIL\n• direction: RECEIVED\n• subject: RE: [TICKET #...]\n• content: accusé réception\n• sender: TechCorp\n• received_at: NOW()
+    DB -> EMAIL : Confirme enregistrement
+    deactivate DB
+    
+    EMAIL -> TICKET_SVC : Met à jour statut ticket
+    activate TICKET_SVC
+    TICKET_SVC -> DB : Change statut ASSIGNED → ACKNOWLEDGED
+    activate DB
+    note right : • status = ACKNOWLEDGED\n• acknowledged_at = NOW()\n• sla_ack_respected = TRUE
+    DB -> TICKET_SVC : Confirme maj statut
+    deactivate DB
+    deactivate TICKET_SVC
+    
+    EMAIL -> RSI : Notifie accusé reçu
+    note right : 📱 Notification:\n"TechCorp a accusé réception\ndu ticket #TICK-2024-0123"
+end
+
+' === PHASE 7: MONITORING AUTOMATIQUE ACTIVÉ ===
+group #FFCCCC Activation du Monitoring Automatique
+    note over NOTIF, SLA #FFAAAA : **🔄 Monitoring SLA Automatique Activé**
+    
+    NOTIF -> NOTIF : Lance surveillance continue
+    note right : • Contrôle respect délais\n• Calcul temps restant\n• Alertes programmées\n• Relances automatiques
+    
+    SLA -> SLA : Démarre compteurs SLA
+    note right : ⏱️ **Compteurs actifs:**\n• Temps écoulé: 45min\n• Prochaine étape: Réponse dans 3h15\n• Deadline résolution: 23h15
+end
+
+' Messages de statut
+note over RSI #LIGHTGREEN : **✓ Assignation Réussie**\n• Ticket pris en charge par TechCorp\n• SLA 24h activé et surveillé\n• Communications tracées\n• Monitoring automatique en cours
+
+note over CONTRACTOR #LIGHTBLUE : **📋 Ticket en Traitement**\n• Problème analysé\n• Ressources allouées\n• Deadline: 24h\n• Statut: ACKNOWLEDGED
+
+' Résultat final
+note over RSI, CONTRACTOR #FFFFCC : **🎯 Résultat de l'Assignation:**\n• Ticket formellement assigné avec SLA approprié\n• Sous-traitant notifié et engagé\n• Monitoring automatique et relances programmées\n• Traçabilité complète des échanges\n• RSI informé en temps réel des évolutions
+
+@enduml
