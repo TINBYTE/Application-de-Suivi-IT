@@ -1,0 +1,169 @@
+@startuml
+!theme plain
+title Diagramme de Séquence - Suivi du Ticket et Clôture
+
+actor RSI
+participant Dashboard
+participant TicketService 
+participant SLAMonitor
+participant EmailService
+participant ValidationService
+participant Database
+actor Contractor
+participant SystemAuto
+
+== Phase 1: Monitoring SLA ==
+
+SystemAuto -> SLAMonitor : Controle SLA
+activate SLAMonitor
+
+SLAMonitor -> Database : Recupere tickets actifs
+activate Database
+Database -> SLAMonitor : Liste tickets
+deactivate Database
+
+SLAMonitor -> SLAMonitor : Calcule temps restant
+
+alt SLA respecte
+    SLAMonitor -> SystemAuto : Continue monitoring
+else SLA proche
+    SLAMonitor -> RSI : Alerte proximite
+else SLA depasse
+    SLAMonitor -> EmailService : Envoie relance
+    activate EmailService
+    EmailService -> Contractor : Email relance
+    EmailService -> Database : Enregistre relance
+    activate Database
+    deactivate Database
+    deactivate EmailService
+    SLAMonitor -> RSI : Notifie depassement
+end
+
+deactivate SLAMonitor
+
+RSI -> Dashboard : Consulte tableau bord
+activate Dashboard
+Dashboard -> Database : Recupere donnees
+activate Database
+Database -> Dashboard : Retourne donnees
+deactivate Database
+Dashboard -> RSI : Affiche status
+deactivate Dashboard
+
+== Phase 2: Communication ==
+
+Contractor -> EmailService : Envoie mise a jour
+
+EmailService -> Database : Enregistre communication
+activate Database
+Database -> EmailService : Confirme
+deactivate Database
+
+EmailService -> TicketService : Notifie communication
+activate TicketService
+TicketService -> Database : Met a jour ticket
+activate Database
+Database -> TicketService : Confirme
+deactivate Database
+deactivate TicketService
+
+EmailService -> RSI : Notifie reponse
+
+RSI -> EmailService : Repond validation
+EmailService -> Contractor : Envoie confirmation
+EmailService -> Database : Enregistre reponse
+activate Database
+deactivate Database
+
+== Phase 3: Livraison ==
+
+Contractor -> EmailService : Signale fin intervention
+
+EmailService -> Database : Enregistre livraison
+activate Database
+Database -> EmailService : Confirme
+deactivate Database
+
+EmailService -> TicketService : Notifie solution livree
+activate TicketService
+TicketService -> Database : Change statut DELIVERED
+activate Database
+Database -> TicketService : Confirme
+deactivate Database
+deactivate TicketService
+
+EmailService -> RSI : Solution livree
+
+== Phase 4: Validation ==
+
+RSI -> ValidationService : Lance validation
+activate ValidationService
+
+ValidationService -> ValidationService : Execute tests
+
+ValidationService -> Database : Enregistre resultats
+activate Database
+Database -> ValidationService : Confirme
+deactivate Database
+
+alt Tests OK
+    ValidationService -> TicketService : Valide solution
+    activate TicketService
+    TicketService -> Database : Statut RESOLVED
+    activate Database
+    Database -> TicketService : Confirme
+    deactivate Database
+    deactivate TicketService
+    
+    ValidationService -> EmailService : Notifie acceptation
+    activate EmailService
+    EmailService -> Contractor : Solution acceptee
+    deactivate EmailService
+else Tests KO
+    ValidationService -> EmailService : Signale rejet
+end
+
+deactivate ValidationService
+
+== Phase 5: Cloture ==
+
+RSI -> TicketService : Demande cloture
+activate TicketService
+
+TicketService -> Database : Finalise ticket
+activate Database
+Database -> TicketService : Confirme cloture
+deactivate Database
+
+TicketService -> Database : Calcule performance
+activate Database
+Database -> TicketService : Retourne metriques
+deactivate Database
+
+TicketService -> Database : Met a jour rating
+activate Database
+Database -> TicketService : Confirme
+deactivate Database
+
+TicketService -> EmailService : Notifie cloture
+activate EmailService
+EmailService -> Contractor : Ticket ferme
+EmailService -> Database : Enregistre
+activate Database
+deactivate Database
+deactivate EmailService
+
+deactivate TicketService
+
+== Phase 6: Archivage ==
+
+RSI -> Database : Declenche archivage
+activate Database
+
+Database -> Database : Archive complet
+Database -> Database : Base connaissance
+
+Database -> RSI : Archivage termine
+deactivate Database
+
+@enduml
