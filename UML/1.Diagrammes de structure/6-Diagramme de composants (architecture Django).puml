@@ -1,0 +1,264 @@
+@startuml
+!theme plain
+title Diagramme de Composants - Architecture Django\nApplication RSI Gestion Tickets
+
+' Configuration
+!define COMPONENT_COLOR #E8F4FD
+!define APP_COLOR #D4E8FC
+!define SERVICE_COLOR #FFF2CC
+!define EXTERNAL_COLOR #FFE6E6
+
+' Couche Présentation
+package "Presentation Layer" <<Layer>> {
+    
+    package "Templates" <<Folder>> {
+        component [base.html] <<Template>>
+        component [dashboard.html] <<Template>>
+        component [ticket_list.html] <<Template>>
+        component [project_detail.html] <<Template>>
+        component [communication_form.html] <<Template>>
+    }
+    
+    package "Static Assets" <<Folder>> {
+        component [Bootstrap CSS] <<CSS>>
+        component [Custom CSS] <<CSS>>
+        component [jQuery] <<JavaScript>>
+        component [Chart.js] <<JavaScript>>
+        component [Font Awesome] <<Icons>>
+    }
+    
+    package "Forms" <<Folder>> {
+        component [TicketForm] <<Form>>
+        component [ProjectForm] <<Form>>
+        component [ProblemForm] <<Form>>
+        component [CommunicationForm] <<Form>>
+        component [SearchForm] <<Form>>
+    }
+}
+
+' Couche Application Django
+package "Django Application Layer" <<Layer>> {
+    
+    package "Core App" <<Django App>> APP_COLOR {
+        component [CoreViews] <<Views>>
+        component [CoreModels] <<Models>>
+        component [CoreUtils] <<Utils>>
+        component [CoreAdmin] <<Admin>>
+    }
+    
+    package "Dashboard App" <<Django App>> APP_COLOR {
+        component [DashboardViews] <<Views>>
+        component [DashboardWidgets] <<Widgets>>
+        component [KPICalculator] <<Service>>
+        component [ChartGenerator] <<Service>>
+    }
+    
+    package "Projects App" <<Django App>> APP_COLOR {
+        component [ProjectViews] <<Views>>
+        component [ProjectModels] <<Models>>
+        component [ProjectService] <<Service>>
+        component [ProjectAdmin] <<Admin>>
+        component [ProjectFilters] <<Filters>>
+    }
+    
+    package "Problems App" <<Django App>> APP_COLOR {
+        component [ProblemViews] <<Views>>
+        component [ProblemModels] <<Models>>
+        component [ProblemService] <<Service>>
+        component [CriticalityCalculator] <<Service>>
+        component [ProblemAnalyzer] <<Service>>
+    }
+    
+    package "Tickets App" <<Django App>> APP_COLOR {
+        component [TicketViews] <<Views>>
+        component [TicketModels] <<Models>>
+        component [TicketService] <<Service>>
+        component [TicketAdmin] <<Admin>>
+        component [SLAManager] <<Service>>
+        component [StatusTracker] <<Service>>
+        component [TicketFilters] <<Filters>>
+    }
+    
+    package "Communications App" <<Django App>> APP_COLOR {
+        component [CommunicationViews] <<Views>>
+        component [CommunicationModels] <<Models>>
+        component [EmailService] <<Service>>
+        component [TemplateEngine] <<Service>>
+        component [CommunicationAdmin] <<Admin>>
+    }
+    
+    package "Contractors App" <<Django App>> APP_COLOR {
+        component [ContractorViews] <<Views>>
+        component [ContractorModels] <<Models>>
+        component [ContractorService] <<Service>>
+        component [PerformanceCalculator] <<Service>>
+        component [ContractorAdmin] <<Admin>>
+    }
+    
+    package "Notifications App" <<Django App>> APP_COLOR {
+        component [NotificationViews] <<Views>>
+        component [NotificationModels] <<Models>>
+        component [NotificationService] <<Service>>
+        component [RuleEngine] <<Service>>
+        component [AlertManager] <<Service>>
+    }
+    
+    package "Reports App" <<Django App>> APP_COLOR {
+        component [ReportViews] <<Views>>
+        component [ReportModels] <<Models>>
+        component [PDFGenerator] <<Service>>
+        component [ExcelExporter] <<Service>>
+        component [ReportBuilder] <<Service>>
+    }
+}
+
+' Couche Services Métier
+package "Business Services Layer" <<Layer>> SERVICE_COLOR {
+    
+    component [TicketWorkflowService] <<Service>>
+    component [SLAMonitoringService] <<Service>>
+    component [NotificationScheduler] <<Service>>
+    component [FileUploadService] <<Service>>
+    component [SearchService] <<Service>>
+    component [AuditService] <<Service>>
+    component [ConfigurationService] <<Service>>
+    component [ValidationService] <<Service>>
+}
+
+' Couche Framework Django
+package "Django Framework Layer" <<Layer>> {
+    component [Django URLs] <<URLConf>>
+    component [Django Middleware] <<Middleware>>
+    component [Django ORM] <<ORM>>
+    component [Django Admin] <<Admin>>
+    component [Django Auth] <<Auth>>
+    component [Django Sessions] <<Sessions>>
+    component [Django Forms] <<Forms>>
+    component [Django Templates] <<Templates>>
+}
+
+' Bibliothèques Tierces
+package "Third-Party Libraries" <<Layer>> {
+    component [django-filter] <<Library>>
+    component [django-tables2] <<Library>>
+    component [django-crispy-forms] <<Library>>
+    component [django-import-export] <<Library>>
+    component [ReportLab] <<Library>>
+    component [openpyxl] <<Library>>
+    component [Pillow] <<Library>>
+    component [Celery] <<Library>>
+    component [Redis] <<Library>>
+}
+
+' Composants Externes
+package "External Components" <<Cloud>> EXTERNAL_COLOR {
+    database "PostgreSQL\nDatabase" as DB
+    folder "Media Files\nStorage" as MEDIA
+    folder "Static Files\nStorage" as STATIC
+    component [Email Server\n(SMTP)] as SMTP
+    component [File System] as FS
+    queue "Redis Queue\n(Celery)" as QUEUE
+}
+
+' Configuration et Déploiement
+package "Configuration & Deployment" <<Cloud>> {
+    component [settings.py] <<Config>>
+    component [requirements.txt] <<Dependencies>>
+    component [manage.py] <<CLI>>
+    component [wsgi.py] <<WSGI>>
+    component [Nginx Config] <<WebServer>>
+    component [Gunicorn Config] <<AppServer>>
+}
+
+' Relations entre couches
+
+' Templates vers Views
+[base.html] ..> [DashboardViews] : extends
+[dashboard.html] ..> [DashboardViews] : renders
+[ticket_list.html] ..> [TicketViews] : renders
+[project_detail.html] ..> [ProjectViews] : renders
+
+' Forms vers Views
+[TicketForm] ..> [TicketViews] : validates
+[ProjectForm] ..> [ProjectViews] : validates
+[ProblemForm] ..> [ProblemViews] : validates
+
+' Views vers Services
+[TicketViews] --> [TicketService] : uses
+[ProjectViews] --> [ProjectService] : uses
+[ProblemViews] --> [ProblemService] : uses
+[CommunicationViews] --> [EmailService] : uses
+[DashboardViews] --> [KPICalculator] : uses
+
+' Services vers Models
+[TicketService] --> [TicketModels] : accesses
+[ProjectService] --> [ProjectModels] : accesses
+[ProblemService] --> [ProblemModels] : accesses
+[EmailService] --> [CommunicationModels] : accesses
+
+' Services Business Layer
+[TicketService] --> [TicketWorkflowService] : delegates
+[SLAManager] --> [SLAMonitoringService] : uses
+[EmailService] --> [NotificationScheduler] : triggers
+[ReportBuilder] --> [PDFGenerator] : uses
+[ReportBuilder] --> [ExcelExporter] : uses
+
+' Django Framework
+[TicketViews] --> [Django ORM] : queries
+[ProjectViews] --> [Django URLs] : routes
+[CoreAdmin] --> [Django Admin] : extends
+[TicketModels] --> [Django ORM] : inherits
+
+' Third-Party Libraries
+[TicketFilters] --> [django-filter] : extends
+[TicketViews] --> [django-tables2] : displays
+[TicketForm] --> [django-crispy-forms] : renders
+[PDFGenerator] --> [ReportLab] : generates
+[ExcelExporter] --> [openpyxl] : creates
+[NotificationScheduler] --> [Celery] : schedules
+
+' External Components
+[Django ORM] --> DB : connects
+[FileUploadService] --> MEDIA : stores
+[Django URLs] --> STATIC : serves
+[EmailService] --> SMTP : sends
+[NotificationScheduler] --> QUEUE : enqueues
+[AuditService] --> FS : logs
+
+' Configuration
+[wsgi.py] --> [Gunicorn Config] : configures
+[Nginx Config] --> [Gunicorn Config] : proxies
+[settings.py] --> DB : configures
+[requirements.txt] --> [Third-Party Libraries] : installs
+
+' Relations inter-apps
+[TicketModels] --> [ProblemModels] : references
+[TicketModels] --> [ProjectModels] : references
+[TicketModels] --> [ContractorModels] : references
+[CommunicationModels] --> [TicketModels] : references
+[NotificationModels] --> [TicketModels] : monitors
+
+' Notes explicatives
+note right of [TicketWorkflowService] : Orchestration des\ntransitions d'état\ndes tickets
+
+note right of [SLAMonitoringService] : Surveillance continue\ndes délais SLA\nAlertes automatiques
+
+note right of [NotificationScheduler] : Planification des\nrelances automatiques\nvia Celery/Redis
+
+note bottom of DB : Base de données principale\nPostgreSQL recommandé\nSQLite pour développement
+
+note bottom of QUEUE : Queue asynchrone\npour tâches longues\n(emails, rapports)
+
+' Légende des couleurs
+legend right
+    |Color|Type|
+    |<back:E8F4FD>   </back>| Composant standard |
+    |<back:D4E8FC>   </back>| Django App |
+    |<back:FFF2CC>   </back>| Service métier |
+    |<back:FFE6E6>   </back>| Composant externe |
+endlegend
+
+' Architecture en couches
+note top : **Architecture en couches :**\n1. Présentation (Templates, Forms, Static)\n2. Application Django (Apps modulaires)\n3. Services Métier (Logique complexe)\n4. Framework Django (ORM, Admin, Auth)\n5. Bibliothèques tierces\n6. Composants externes (DB, Files, Queue)
+
+@enduml
