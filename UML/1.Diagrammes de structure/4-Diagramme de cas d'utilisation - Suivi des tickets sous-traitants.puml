@@ -1,0 +1,126 @@
+@startuml
+!theme plain
+title Diagramme de Cas d'Utilisation - Module Suivi des Tickets Sous-traitants
+
+left to right direction
+
+actor "RSI" as RSI
+actor "Sous-traitant" as CONTRACTOR
+actor "Système" as SYSTEM
+
+package "Assignation et Transmission" {
+  usecase "Assigner ticket à sous-traitant" as UC_T01
+  usecase "Sélectionner prestataire adapté" as UC_T02
+  usecase "Préparer dossier transmission" as UC_T03
+  usecase "Transmettre ticket" as UC_T04
+  usecase "Confirmer réception" as UC_T05
+}
+
+package "Suivi et Communication" {
+  usecase "Consulter statut ticket" as UC_T06
+  usecase "Mettre à jour statut" as UC_T07
+  usecase "Envoyer message" as UC_T08
+  usecase "Recevoir réponse" as UC_T09
+  usecase "Enregistrer échange" as UC_T10
+  usecase "Planifier intervention" as UC_T11
+}
+
+package "Contrôle SLA et Alertes" {
+  usecase "Surveiller respect SLA" as UC_T12
+  usecase "Calculer temps écoulé" as UC_T13
+  usecase "Identifier retards" as UC_T14
+  usecase "Envoyer relance automatique" as UC_T15
+  usecase "Escalader si critique" as UC_T16
+  usecase "Appliquer pénalités" as UC_T17
+}
+
+package "Validation et Tests" {
+  usecase "Réceptionner solution" as UC_T18
+  usecase "Tester solution" as UC_T19
+  usecase "Valider fonctionnement" as UC_T20
+  usecase "Accepter livrable" as UC_T21
+  usecase "Refuser si non-conforme" as UC_T22
+}
+
+package "Clôture et Évaluation" {
+  usecase "Finaliser résolution" as UC_T23
+  usecase "Documenter solution" as UC_T24
+  usecase "Évaluer prestation" as UC_T25
+  usecase "Fermer ticket" as UC_T26
+  usecase "Archiver échanges" as UC_T27
+}
+
+package "Gestion Exceptions" {
+  usecase "Gérer ticket bloqué" as UC_T28
+  usecase "Changer de sous-traitant" as UC_T29
+  usecase "Reprendre en interne" as UC_T30
+  usecase "Rouvrir ticket fermé" as UC_T31
+}
+
+' Relations acteurs
+RSI --> UC_T01
+RSI --> UC_T06
+RSI --> UC_T08
+RSI --> UC_T12
+RSI --> UC_T18
+RSI --> UC_T23
+RSI --> UC_T28
+
+CONTRACTOR --> UC_T05
+CONTRACTOR --> UC_T09
+CONTRACTOR --> UC_T18
+
+SYSTEM --> UC_T13
+SYSTEM --> UC_T14
+SYSTEM --> UC_T15
+
+' Relations include principales
+UC_T01 .> UC_T02 : include
+UC_T01 .> UC_T03 : include
+UC_T03 .> UC_T04 : include
+UC_T08 .> UC_T10 : include
+UC_T09 .> UC_T10 : include
+UC_T12 .> UC_T13 : include
+UC_T18 .> UC_T19 : include
+UC_T23 .> UC_T24 : include
+
+' Relations extend optionnelles
+UC_T05 .> UC_T04 : extend
+UC_T11 .> UC_T08 : extend
+UC_T16 .> UC_T14 : extend
+UC_T17 .> UC_T14 : extend
+UC_T20 .> UC_T19 : extend
+UC_T21 .> UC_T20 : extend
+UC_T22 .> UC_T20 : extend
+UC_T25 .> UC_T23 : extend
+UC_T27 .> UC_T26 : extend
+UC_T29 .> UC_T28 : extend
+UC_T30 .> UC_T28 : extend
+UC_T31 .> UC_T26 : extend
+
+' Workflow principal
+UC_T02 --> UC_T03
+UC_T04 --> UC_T06
+UC_T09 --> UC_T07
+UC_T19 --> UC_T21
+UC_T21 --> UC_T23
+UC_T24 --> UC_T26
+
+' Points de décision
+UC_T14 --> UC_T15 : Si retard
+UC_T14 --> UC_T16 : Si critique
+UC_T20 --> UC_T21 : Si conforme
+UC_T20 --> UC_T22 : Si non-conforme
+
+' Notes explicatives
+note right of UC_T01 : Point d'entrée principal\ndepuis déclaration problème
+
+note right of UC_T12 : SLA automatique :\nP1: 4h, P2: 24h\nP3: 72h, P4: 168h
+
+note right of UC_T15 : Relances programmées :\nJ+1, J+3, J+5, J+7
+
+note right of UC_T19 : Tests multi-niveaux :\n- Fonctionnel\n- Utilisateur\n- Sécurité
+
+note bottom : Workflow : Assignation → Suivi → Validation → Clôture
+
+@enduml
