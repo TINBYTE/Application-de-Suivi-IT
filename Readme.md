@@ -1,6 +1,6 @@
 # Application de Suivi RSI – Gestion des Projets et Tickets IT
 
-Bienvenue dans cette application développée pour répondre aux besoins spécifiques d’un **Responsable des Systèmes Informatiques (RSI)** travaillant dans une entreprise de préfabrication.
+Bienvenue dans cette application développée pour répondre aux besoins spécifiques d’un **Responsable des Systèmes Informatiques (RSI)** .
 
 Elle a pour but de centraliser la **gestion des problèmes informatiques**, le **suivi des demandes internes**, et la **communication avec les sous-traitants IT**, tout en facilitant la **traçabilité** des actions.
 
